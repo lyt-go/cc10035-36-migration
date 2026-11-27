@@ -69,6 +69,20 @@ npm run dev
 | 数据流管道 | `data_stream` | 流管道 | 管道编号、输入源、处理算子链 |
 | 聚合分发 | `aggregate_sink` | 分发任务 | 任务编号、数据窗口、聚合函数 |
 
+## 区间申请（旧导出时段迁移）
+
+数据流管道和批量导出的两套旧导出时段（「过去一天」、带偏移的明确时刻）可迁移为区间申请：
+
+- 「过去一天」锚定原提交时间，截止时刻固定；带偏移的明确时刻保留实际区间；
+  无法解释的旧记录展示原文本和失败原因，不允许继续。
+- 领取进度详情展示历史时区、实际区间和掌管入口；新旧入口并行时，
+  一笔申请只由持有效进度依据（掌管入口 + 续领凭证）的入口接续，已签收片段不会再次交付。
+- 费用按同次申请的真实区间计（0.05 元/小时），不因隔天操作重新按当前时间取数。
+
+接口在 `backend/app/routers/interval_claim.py`（`/api/interval-claims`），
+领域逻辑在 `backend/app/services/interval_claim.py`，前端页面 `frontend/src/views/IntervalClaimsView.vue`
+（路由 `/interval-claims`）。场景测试见 `backend/tests/test_interval_claim.py`。
+
 ## 约定
 
 - 全部模块共享`frontend/src/views/WorkbenchView.vue|tsx`和一套资源路由。
